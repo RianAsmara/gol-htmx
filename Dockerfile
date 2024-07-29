@@ -7,16 +7,14 @@ WORKDIR /app
 COPY go.mod go.sum ./
 RUN go mod download
 
-# Copy the remaining source code
+# Copy the remaining source code and Makefile
 COPY . .
-# List files for debugging
-RUN ls -la /app
 
-# Print Go environment for debugging
-RUN go env
+# Install Make (if not already installed in the Go image)
+RUN apt-get update && apt-get install -y make
 
-# Build the Go application and provide detailed error output
-RUN go build -o gol-htmx . || { echo "Build failed"; exit 1; }
+# Run Makefile build target
+RUN make build
 
 # Stage 2: Create a lightweight image
 FROM alpine:latest
