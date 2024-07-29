@@ -9,7 +9,6 @@ RUN go mod download
 
 # Copy the remaining source code
 COPY . .
-
 # List files for debugging
 RUN ls -la /app
 
