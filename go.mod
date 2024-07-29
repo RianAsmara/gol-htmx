@@ -1,6 +1,6 @@
 module github.com/RianAsmara/gol-htmx
 
-go 1.19
+go 1.22.5
 
 require github.com/gorilla/websocket v1.5.1
 

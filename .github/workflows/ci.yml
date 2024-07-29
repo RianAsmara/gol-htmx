@@ -28,10 +28,10 @@ jobs:
       run: go test ./...
 
     - name: Build Docker image
-      run: docker build -t your-docker-registry/chat:latest .
+      run: docker build -t rianasmaraputra/go-sock-x:latest .
 
     - name: Push Docker image
-      run: docker push your-docker-registry/chat:latest
+      run: docker push rianasmaraputra/go-sock-x:latest
 
     - name: Slack Notification
       uses: 8398a7/action-slack@v3

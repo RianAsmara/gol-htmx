@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   chat:
-    image: your-docker-registry/chat:latest
+    image: rianasmaraputra/go-sock-x:latest
     ports:
       - "8080:8080"
     environment:
