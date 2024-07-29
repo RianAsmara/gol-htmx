@@ -1,0 +1,10 @@
+version: '3.8'
+
+services:
+  chat:
+    image: your-docker-registry/chat:latest
+    ports:
+      - "8080:8080"
+    environment:
+      - PORT=8080
+    restart: always
