@@ -2,7 +2,6 @@
 FROM golang:latest AS builder
 
 WORKDIR /app
-
 # Copy go.mod and go.sum files first to cache dependencies
 COPY go.mod go.sum ./
 RUN go mod download
