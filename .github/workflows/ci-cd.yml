@@ -1,4 +1,4 @@
-name: Go CI
+name: Go HTMX Websocket Pipeline
 
 on:
   push:
@@ -36,7 +36,7 @@ jobs:
   build:
     name: Build Go Application
     runs-on: ubuntu-latest
-    needs: setup
+    needs: setup  # Ensure this job runs after the setup job
 
     steps:
       - name: Checkout code
@@ -58,47 +58,19 @@ jobs:
       - name: Build
         run: go build -o gol-htmx .
 
+      - name: Run tests
+        run: go test ./...
+
       - name: Upload Build Artifacts
         uses: actions/upload-artifact@v3
         with:
           name: gol-htmx
           path: ./gol-htmx
 
-  test:
-    name: Run Tests
-    runs-on: ubuntu-latest
-    needs: build
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Set up Go
-        uses: actions/setup-go@v3
-        with:
-          go-version: 1.22.5
-
-      - name: Cache Go modules
-        uses: actions/cache@v3
-        with:
-          path: ~/go/pkg/mod
-          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-          restore-keys: |
-            ${{ runner.os }}-go-
-
-      - name: Download Build Artifacts
-        uses: actions/download-artifact@v3
-        with:
-          name: gol-htmx
-
-      - name: Run tests
-        run: go test ./...
-
-  deploy:
+  docker:
     name: Build and Push Docker Image
     runs-on: ubuntu-latest
-    needs: test
-    if: success()  # Only run if the test job passes
+    needs: build  # Ensure this job runs after the build job
 
     steps:
       - name: Checkout code
@@ -124,37 +96,22 @@ jobs:
           docker build -t ${{ secrets.DOCKER_USERNAME }}/go-sock-x:latest .
           docker push ${{ secrets.DOCKER_USERNAME }}/go-sock-x:latest
 
-      - name: Tag as latest stable
-        if: github.ref == 'refs/heads/main'
-        run: |
-          git tag -f stable
-          git push origin stable --force
+  # - name: Deploy to VPS
+    #   env:
+    #     SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+    #     VPS_USER: ${{ secrets.VPS_USER }}
+    #     VPS_HOST: ${{ secrets.VPS_HOST }}
+    #   run: |
+    #     echo "${SSH_PRIVATE_KEY}" > private_key
+    #     chmod 600 private_key
+    #     scp -o StrictHostKeyChecking=no -i private_key docker-compose.yml ${VPS_USER}@${VPS_HOST}:/home/${VPS_USER}/docker-compose.yml
+    #     ssh -o StrictHostKeyChecking=no -i private_key ${VPS_USER}@${VPS_HOST} '
+    #       docker-compose -f /home/${VPS_USER}/docker-compose.yml pull
+    #       docker-compose -f /home/${VPS_USER}/docker-compose.yml up -d
+    #     '
 
-  rollback:
-    name: Rollback on Failure
-    runs-on: ubuntu-latest
-    needs: deploy
-    if: failure()  # Only run if the deploy job fails
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-        with:
-          ref: stable  # Checkout the last stable tag
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
-
-      - name: Log in to Docker Hub
-        uses: docker/login-action@v2
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_TOKEN }}
-
-      - name: Build and push Docker image
-        run: |
-          docker build -t ${{ secrets.DOCKER_USERNAME }}/go-sock-x:latest .
-          docker push ${{ secrets.DOCKER_USERNAME }}/go-sock-x:latest
+    # - name: Apply Database Migrations
+    #   run: ./migrate -path ./migrations -database ${{ secrets.DATABASE_URL }} up
 
     # - name: Slack Notification
     #   uses: 8398a7/action-slack@v3
