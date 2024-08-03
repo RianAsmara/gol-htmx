@@ -96,19 +96,19 @@ jobs:
           docker build -t ${{ secrets.DOCKER_USERNAME }}/go-sock-x:latest .
           docker push ${{ secrets.DOCKER_USERNAME }}/go-sock-x:latest
 
-  # - name: Deploy to VPS
-    #   env:
-    #     SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-    #     VPS_USER: ${{ secrets.VPS_USER }}
-    #     VPS_HOST: ${{ secrets.VPS_HOST }}
-    #   run: |
-    #     echo "${SSH_PRIVATE_KEY}" > private_key
-    #     chmod 600 private_key
-    #     scp -o StrictHostKeyChecking=no -i private_key docker-compose.yml ${VPS_USER}@${VPS_HOST}:/home/${VPS_USER}/docker-compose.yml
-    #     ssh -o StrictHostKeyChecking=no -i private_key ${VPS_USER}@${VPS_HOST} '
-    #       docker-compose -f /home/${VPS_USER}/docker-compose.yml pull
-    #       docker-compose -f /home/${VPS_USER}/docker-compose.yml up -d
-    #     '
+      - name: Deploy to VPS
+        env:
+            SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+            VPS_USER: ${{ secrets.VPS_USER }}
+            VPS_HOST: ${{ secrets.VPS_HOST }}
+        run: |
+            echo "${SSH_PRIVATE_KEY}" > private_key
+            chmod 600 private_key
+            scp -o StrictHostKeyChecking=no -i private_key docker-compose.yml ${VPS_USER}@${VPS_HOST}:/home/${VPS_USER}/docker-compose.yml
+            ssh -o StrictHostKeyChecking=no -i private_key ${VPS_USER}@${VPS_HOST} '
+              docker-compose -f /home/${VPS_USER}/docker-compose.yml pull
+              docker-compose -f /home/${VPS_USER}/docker-compose.yml up -d
+            '
 
     # - name: Apply Database Migrations
     #   run: ./migrate -path ./migrations -database ${{ secrets.DATABASE_URL }} up
