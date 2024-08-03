@@ -102,6 +102,7 @@ jobs:
             VPS_USER: ${{ secrets.VPS_USER }}
             VPS_HOST: ${{ secrets.VPS_HOST }}
         run: |
+            ssh -o StrictHostKeyChecking=no -i private_key -T ${VPS_USER}@${VPS_HOST} 'echo "SSH connection successful"'
             echo "${SSH_PRIVATE_KEY}" > private_key
             chmod 600 private_key
             scp -o StrictHostKeyChecking=no -i private_key docker-compose.yml ${VPS_USER}@${VPS_HOST}:/home/${VPS_USER}/docker-compose.yml
