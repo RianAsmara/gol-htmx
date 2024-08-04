@@ -20,4 +20,5 @@ WORKDIR /root/
 COPY --from=builder /app/gol-htmx .
 
 EXPOSE 8080
+
 CMD ["./gol-htmx"]
