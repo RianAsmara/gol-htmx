@@ -95,13 +95,13 @@ jobs:
         run: |
           docker build -t ${{ secrets.DOCKER_USERNAME }}/go-sock-x:latest .
           docker push ${{ secrets.DOCKER_USERNAME }}/go-sock-x:latest
-
-          - name: Deploy to VPS
-          env:
+        
+      - name: Deploy to VPS
+        env:
               SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
               VPS_USER: ${{ secrets.VPS_USER }}
               VPS_HOST: ${{ secrets.VPS_HOST }}
-          run: |
+        run: |
               echo "${SSH_PRIVATE_KEY}" | tr -d '\r' > private_key
               chmod 600 private_key
         
