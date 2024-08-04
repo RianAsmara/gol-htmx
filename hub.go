@@ -46,6 +46,7 @@ func (h *Hub) run() {
 			h.Unlock()
 
 			log.Printf("client registered %s", client.id)
+
 			for _, msg := range h.messages {
 				client.send <- getMessageTemplate(msg)
 			}
