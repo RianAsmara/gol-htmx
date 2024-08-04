@@ -96,15 +96,17 @@ jobs:
           docker build -t ${{ secrets.DOCKER_USERNAME }}/go-sock-x:latest .
           docker push ${{ secrets.DOCKER_USERNAME }}/go-sock-x:latest
 
-      - name: Deploy to VPS
-        env:
+          - name: Deploy to VPS
+          env:
               SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
               VPS_USER: ${{ secrets.VPS_USER }}
               VPS_HOST: ${{ secrets.VPS_HOST }}
-        run: |
-              # Create the SSH key file
+          run: |
               echo "${SSH_PRIVATE_KEY}" | tr -d '\r' > private_key
               chmod 600 private_key
+        
+              # Create directory on VPS if it doesn't exist
+              ssh -o StrictHostKeyChecking=no -i private_key ${VPS_USER}@${VPS_HOST} "mkdir -p /home/${VPS_USER}/"
         
               # Copy the Docker Compose file to the VPS
               scp -o StrictHostKeyChecking=no -i private_key docker-compose.yml ${VPS_USER}@${VPS_HOST}:/home/${VPS_USER}/docker-compose.yml
