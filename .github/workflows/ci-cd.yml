@@ -134,7 +134,7 @@ jobs:
           chmod 600 private_key
           ssh -o StrictHostKeyChecking=no -i private_key ${VPS_USER}@${VPS_HOST} "mkdir -p /${VPS_USER}/config"
           scp -o StrictHostKeyChecking=no -i private_key docker-compose.yml ${VPS_USER}@${VPS_HOST}:/${VPS_USER}/config/docker-compose.yml
-          ssh -o StrictHostKeyChecking=no -i private_key ${VPS_USER}@${VPS_HOST}'
+          ssh -o StrictHostKeyChecking=no -i private_key ${VPS_USER}@${VPS_HOST} '
             echo "Current directory on VPS: $(pwd)"
             docker-compose -f /${VPS_USER}/config/docker-compose.yml up -d
           '
