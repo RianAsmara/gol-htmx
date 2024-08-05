@@ -133,11 +133,7 @@ jobs:
           echo "${SSH_PRIVATE_KEY}" | tr -d '\r' > private_key
           chmod 600 private_key
           ssh -o StrictHostKeyChecking=no -i private_key ${VPS_USER}@${VPS_HOST} "mkdir -p /home/${VPS_USER}/"
-          scp -o StrictHostKeyChecking=no -i private_key docker-compose.yml ${VPS_USER}@${VPS_HOST}:/home/${VPS_USER}/docker-compose.yml
-          ssh -o StrictHostKeyChecking=no -i private_key ${VPS_USER}@${VPS_HOST} '
-            docker-compose -f /home/${VPS_USER}/docker-compose.yml pull
-            docker-compose -f /home/${VPS_USER}/docker-compose.yml up -d
-          '
+          ssh -o StrictHostKeyChecking=no -i private_key ${VPS_USER}@${VPS_HOST} "pwd"
           rm private_key
 
       - name: Notify Telegram
