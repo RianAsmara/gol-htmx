@@ -137,7 +137,7 @@ jobs:
           ssh -o StrictHostKeyChecking=no -i private_key ${VPS_USER}@${VPS_HOST} '
             echo "Current directory on VPS: $(pwd)"
             ls -l /'${VPS_USER}'/config/docker-compose.yml
-            docker-compose -f /${VPS_USER}/config/docker-compose.yml up -d
+            docker-compose -f ${VPS_USER}/config/docker-compose.yml up -d
           '
           rm private_key
 
