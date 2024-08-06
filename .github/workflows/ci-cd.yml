@@ -46,8 +46,8 @@ jobs:
             Author: ${{ github.actor }}
             
   deploy:
-    name: Deploy Binary to VPS
     needs: build
+    name: Deploy Binary to VPS
     runs-on: ubuntu-latest
     environment: development
 
@@ -61,9 +61,9 @@ jobs:
           script: |
             whoami
             # Stop and remove old containers
-            docker stop realtime-chat-htmx || true && docker rm realtime-chat-htmx || true
+            docker stop realtime-chat-htmx-container || true && docker rm realtime-chat-htmx-container || true
             # Pull and run the new container
-            docker pull realtime-chat-htmx:latest
+            docker pull ${{ secrets.DOCKER_USERNAME }}/realtime-chat-htmx:latest
             docker -d -p 8080:8080 --name realtime-chat-htmx-container realtime-chat-htmx:latest
 
       - name: Notify Telegram
