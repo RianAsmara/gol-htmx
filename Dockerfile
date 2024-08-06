@@ -1,35 +1,21 @@
-# # Build stage
-# FROM golang:alpine AS builder
-# WORKDIR /app
-# COPY . .
-# RUN GOOS=linux GOARCH=amd64 go build -o gol-htmx .
+FROM golang:latest
 
-# # Run stage
-# FROM alpine:latest
-# WORKDIR /app/
-# COPY --from=builder /app/gol-htmx .
-# RUN chmod +x gol-htmx
-# EXPOSE 8080
-# CMD ["./gol-htmx"]
-
-FROM golang:1.21.12-alpine
-
-RUN addgroup -S golang && adduser -S gouser -G golang
+# Create a group and user with specific IDs to ensure compatibility
+RUN groupadd -r golang && useradd -r -g golang gouser
 
 WORKDIR /app
 
 COPY . .
 
 RUN go mod tidy
-
 RUN go mod download
-
 RUN go build -o gol-htmx
 
-RUN chown gouser:golang /app
+# Change ownership of the application directory
+RUN chown -R gouser:golang /app
 
 USER gouser
 
 EXPOSE 8080
 
-CMD ./gol-htmx
+CMD ["./gol-htmx"]
