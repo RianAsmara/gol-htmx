@@ -9,5 +9,5 @@ COPY . .
 RUN go mod tidy
 
 RUN go build -o binary
-# Entry
+
 ENTRYPOINT [ "/app/binary" ]
