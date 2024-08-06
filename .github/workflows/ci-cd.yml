@@ -67,7 +67,7 @@ jobs:
           script: |
             # Pull and run the new container
             docker pull ${{ secrets.DOCKER_USERNAME }}/realtime-chat-htmx:latest
-            docker run -d -p 8080:8080 --name realtime-chat-htmx-container realtime-chat-htmx:latest
+            docker run -d -p 8080:8080 --name realtime-chat-htmx-container ${{ secrets.DOCKER_USERNAME }}/realtime-chat-htmx:latest
 
       - name: Notify Telegram
         if: always()
