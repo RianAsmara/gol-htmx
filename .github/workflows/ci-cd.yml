@@ -65,6 +65,9 @@ jobs:
           host: ${{ secrets.VPS_HOST }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
+            whoami
+            # Stop and remove old containers
+            docker stop realtime-chat-htmx-container || true && docker rm realtime-chat-htmx-container || true
             # Pull and run the new container
             docker pull ${{ secrets.DOCKER_USERNAME }}/realtime-chat-htmx:latest
             docker run -d -p 8080:8080 --name realtime-chat-htmx-container ${{ secrets.DOCKER_USERNAME }}/realtime-chat-htmx:latest
