@@ -28,5 +28,5 @@ func main() {
 		serveWs(hub, w, r)
 	})
 
-	log.Fatal(http.ListenAndServe(":8000", nil))
+	log.Fatal(http.ListenAndServe(":8080", nil)) // Change port to 8080
 }
