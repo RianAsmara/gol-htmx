@@ -6,30 +6,77 @@ on:
       - main
 
 jobs:
-  build:
-    name: Build Go Application
+  setup:
+    name: Setup Go Environment
     runs-on: ubuntu-latest
-    environment: development
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Log in to Docker Hub
-        uses: docker/login-action@v2
+      - name: Set up Go
+        uses: actions/setup-go@v3
         with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_TOKEN }}
+          go-version: 1.22.5
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
-      
-      - name: Build and push Docker Image
-        uses: docker/build-push-action@v4
-        with: 
-          file: ./Dockerfile
-          push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/realtime-chat-htmx:latest
+      - name: Cache Go modules
+        uses: actions/cache@v3
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+
+      - name: Install dependencies
+        run: go mod tidy
+
+      - name: Notify Telegram
+        if: always()
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_CHAT_ID }}
+          token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          message: |
+            Setup Stage Completed
+            Job Status: ${{ job.status }}
+            Repository: ${{ github.repository }}
+            Branch: ${{ github.ref }}
+            Commit: ${{ github.sha }}
+            Author: ${{ github.actor }}
+
+  build:
+    name: Build Go Application
+    runs-on: ubuntu-latest
+    needs: setup
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: 1.22.5
+
+      - name: Cache Go modules
+        uses: actions/cache@v3
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+
+      - name: Build
+        run: go build -o gol-htmx .
+
+      - name: Run tests
+        run: go test ./...
+
+      - name: Upload Build Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: gol-htmx
+          path: ./gol-htmx
 
       - name: Notify Telegram
         if: always()
@@ -44,18 +91,52 @@ jobs:
             Branch: ${{ github.ref }}
             Commit: ${{ github.sha }}
             Author: ${{ github.actor }}
-deployment:
-    needs: build
+
+  docker:
+    name: Build and Push Docker Image
     runs-on: ubuntu-latest
-    environment: development
+    needs: build
 
     steps:
-      - name: Deploy To VPS
-        uses: appleboy/ssh-action@master
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
         with:
-          username: ${{ secrets.VPS_USER }}
-          host: ${{ secrets.VPS_HOST }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_TOKEN }}
+
+      - name: Download Build Artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: gol-htmx
+          path: .
+
+      - name: Build and push Docker image
+        run: |
+          docker build --no-cache -t ${{ secrets.DOCKER_USERNAME }}/go-sock-x:latest .
+          docker push ${{ secrets.DOCKER_USERNAME }}/go-sock-x:latest
+
+      - name: Deploy to VPS
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          VPS_USER: ${{ secrets.VPS_USER }}
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+        run: |
+          echo "${SSH_PRIVATE_KEY}" | tr -d '\r' > private_key
+          chmod 600 private_key
+          ssh -o StrictHostKeyChecking=no -i private_key ${VPS_USER}@${VPS_HOST} "mkdir -p /home/test/config"
+          scp -o StrictHostKeyChecking=no -i private_key docker-compose.yml ${VPS_USER}@${VPS_HOST}:/home/test/config/docker-compose.yml
+          ssh -o StrictHostKeyChecking=no -i private_key ${VPS_USER}@${VPS_HOST} '
+            echo "Current directory on VPS: $(pwd)"
+            ls -l /home/test/config/docker-compose.yml
+            docker-compose -f /home/test/config/docker-compose.yml up -d
+          '
+          rm private_key
 
       - name: Notify Telegram
         if: always()
@@ -64,7 +145,7 @@ deployment:
           to: ${{ secrets.TELEGRAM_CHAT_ID }}
           token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           message: |
-            Build Stage Completed
+            Docker Stage Completed
             Job Status: ${{ job.status }}
             Repository: ${{ github.repository }}
             Branch: ${{ github.ref }}
