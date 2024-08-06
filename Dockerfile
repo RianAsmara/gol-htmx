@@ -1,28 +1,13 @@
-FROM golang:latest
+FROM golang:alpine 
 
-# Create a group and user with specific IDs to ensure compatibility
-RUN groupadd -r golang && useradd -r -g golang gouser
+RUN apk update && apk add --no-cache git
 
 WORKDIR /app
 
-# Copy the source code and build it
 COPY . .
 
-# Tidy and download Go modules
 RUN go mod tidy
-RUN go mod download
 
-# Build the Go application
-RUN go build -o gol-htmx
+RUN go build -o binary
 
-# Verify the binary is present and executable
-RUN ls -l /app && chmod +x /app/gol-htmx
-
-# Change ownership of the application directory
-RUN chown -R gouser:golang /app
-
-USER gouser
-
-EXPOSE 8080
-
-CMD ["./gol-htmx"]
+ENTRYPOINT [ "/app/binary" ]
