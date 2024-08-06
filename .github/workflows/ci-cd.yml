@@ -46,6 +46,7 @@ jobs:
             Author: ${{ github.actor }}
             
   deploy:
+    name: Deploy Binary to VPS
     needs: build
     runs-on: ubuntu-latest
     environment: development
