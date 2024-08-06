@@ -1,22 +1,35 @@
-# Stage 1: Build
-FROM golang:alpine AS builder
+# # Build stage
+# FROM golang:alpine AS builder
+# WORKDIR /app
+# COPY . .
+# RUN GOOS=linux GOARCH=amd64 go build -o gol-htmx .
+
+# # Run stage
+# FROM alpine:latest
+# WORKDIR /app/
+# COPY --from=builder /app/gol-htmx .
+# RUN chmod +x gol-htmx
+# EXPOSE 8080
+# CMD ["./gol-htmx"]
+
+FROM golang:1.21.12-alpine
+
+RUN addgroup -S golang && adduser -S gouser -G golang
 
 WORKDIR /app
 
 COPY . .
 
-RUN GOOS=linux GOARCH=amd64 go build -o gol-htmx .
-RUN 
-# Stage 2: Final image
-FROM alpine:latest
+RUN go mod tidy
 
-WORKDIR /root/
+RUN go mod download
 
-COPY --from=builder /app/gol-htmx .
+RUN go build -o gol-htmx
 
-RUN chmod +x gol-htmx
+RUN chown gouser:golang /app
+
+USER gouser
 
 EXPOSE 8080
 
-ENTRYPOINT ["./gol-htmx"]
-
+CMD ./gol-htmx
