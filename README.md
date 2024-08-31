@@ -91,5 +91,3 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - [GitHub Actions](https://github.com/features/actions)
 
 ---
-
-Let me know if there's anything else you'd like to add or modify!
