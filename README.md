@@ -1,5 +1,3 @@
-Here's the updated README reflecting the use of only a Dockerfile and a Makefile:
-
 ---
 
 # Go HTMX Real-Time WebSocket Application
