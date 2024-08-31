@@ -9,6 +9,7 @@ This project is a real-time web application built using Go, HTMX, and WebSockets
 - **Real-Time Updates**: Powered by WebSockets, providing instant data synchronization.
 - **HTMX Integration**: Use of HTMX for interactive HTML components, allowing for seamless UI updates without full page reloads.
 - **CI/CD Pipeline**: Automated testing, building, and deployment using GitHub Actions.
+- **Telegram Notification**: Send GitHub Actions Status to Telegram Channel.
 - **Containerized Deployment**: Uses Docker for consistent and efficient deployment on any environment.
 - **Makefile for Automation**: Simplifies building, running, and other repetitive tasks.
 - **Linux VPS Deployment**: Easily deployable on a Linux VPS with minimal setup.
