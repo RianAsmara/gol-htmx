@@ -29,13 +29,13 @@ docker build -t $DOCKER_IMAGE .
 
 # Run the Docker container
 echo "Running the Docker container..."
-docker run -d --name $CONTAINER_NAME -p 8181:8080 $DOCKER_IMAGE
+docker run -d --name $CONTAINER_NAME -p 8080:8080 $DOCKER_IMAGE
 
 # Wait for a few seconds to allow the container to start
 sleep 5
 
 # Check if the application is running
-if curl -s http://localhost:8181 > /dev/null; then
+if curl -s http://localhost:8080 > /dev/null; then
     echo "Application is running successfully inside the Docker container!"
 else
     echo "Application failed to start."
